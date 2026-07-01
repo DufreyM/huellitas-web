@@ -1,0 +1,409 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  fullName     String    @map("full_name")
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  phone        String?
+  profilePhoto String?   @map("profile_photo")
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime  @map("created_at")
+  updatedAt    DateTime  @map("updated_at")
+
+  roles                 UserRole[]
+  createdPets           Pet[]                @relation("PetCreatedBy")
+  shelterLocations      ShelterLocation[]
+  reviewedRequests      AdoptionRequest[]    @relation("ReviewedBy")
+  deliveredAdoptions    Adoption[]           @relation("DeliveredBy")
+  followups             AdoptionFollowup[]   @relation("PerformedBy")
+  receivedDonations     Donation[]           @relation("ReceivedBy")
+  medicalRecords        MedicalRecord[]      @relation("VeterinarianMedicalRecord")
+  vaccinations          Vaccination[]        @relation("VeterinarianVaccination")
+  dewormings            Deworming[]          @relation("VeterinarianDeworming")
+  surgeries             Surgery[]            @relation("VeterinarianSurgery")
+  createdEvents         Event[]
+  eventStaff            EventStaff[]
+  publishedStories      SuccessStory[]
+  notifications         Notification[]
+  uploadedFiles         File[]
+  auditLogs             AuditLog[]
+  adopter               Adopter?
+
+  @@map("users")
+}
+
+model Role {
+  id          Int    @id
+  name        String @unique
+  description String?
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          Int    @id
+  name        String @unique
+  description String?
+
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId Int @map("user_id")
+  roleId Int @map("role_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       Int @map("role_id")
+  permissionId Int @map("permission_id")
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+//==================================================
+// CATALOGS
+//==================================================
+
+model Species {
+  id        Int     @id
+  name      String  @unique
+  isActive  Boolean @default(true) @map("is_active")
+
+  breeds Breed[]
+
+  @@map("species")
+}
+
+model Gender {
+  id   Int    @id
+  name String @unique
+
+  pets Pet[]
+
+  @@map("genders")
+}
+
+model PetSize {
+  id   Int    @id
+  name String @unique
+
+  pets Pet[]
+
+  @@map("pet_sizes")
+}
+
+model PetStatus {
+  id   Int    @id
+  name String @unique
+
+  pets    Pet[]
+  history PetStatusHistory[]
+
+  @@map("pet_statuses")
+}
+
+model Department {
+  id   Int    @id
+  name String @unique
+
+  municipalities Municipality[]
+
+  @@map("departments")
+}
+
+model AdoptionRequestStatus {
+  id       Int     @id
+  name     String  @unique
+  isFinal  Boolean @default(false) @map("is_final")
+  sortOrder Int?   @map("sort_order")
+
+  requests AdoptionRequest[]
+
+  @@map("adoption_request_statuses")
+}
+
+model PaymentMethod {
+  id   Int    @id
+  name String @unique
+
+  donations Donation[]
+
+  @@map("payment_methods")
+}
+
+model DonationType {
+  id   Int    @id
+  name String @unique
+
+  donations Donation[]
+
+  @@map("donation_types")
+}
+
+model EventType {
+  id   Int    @id
+  name String @unique
+
+  events Event[]
+
+  @@map("event_types")
+}
+
+model EventStatus {
+  id        Int     @id
+  name      String  @unique
+  isFinal   Boolean @default(false) @map("is_final")
+  sortOrder Int?    @map("sort_order")
+
+  events Event[]
+
+  @@map("event_statuses")
+}
+
+model Breed {
+  id Int @id @default(autoincrement())
+
+  speciesId Int    @map("species_id")
+  name      String
+
+  species Species @relation(fields: [speciesId], references: [id])
+
+  pets Pet[]
+
+  @@unique([speciesId, name])
+  @@map("breeds")
+}
+
+model Color {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  pets PetColor[]
+
+  @@map("colors")
+}
+
+model Municipality {
+  id Int @id @default(autoincrement())
+
+  departmentId Int    @map("department_id")
+  name         String
+
+  department Department @relation(fields: [departmentId], references: [id])
+
+  adopters         Adopter[]
+  shelterLocations ShelterLocation[]
+  locations        Location[]
+
+  @@unique([departmentId, name])
+  @@map("municipalities")
+}
+
+model ShelterLocation {
+  id Int @id @default(autoincrement())
+
+  name    String
+  type    String
+  address String?
+
+  municipalityId Int? @map("municipality_id")
+  contactUserId  Int? @map("contact_user_id")
+
+  isActive Boolean  @default(true) @map("is_active")
+  createdAt DateTime @map("created_at")
+
+  municipality Municipality? @relation(fields: [municipalityId], references: [id])
+
+  contactUser User? @relation(fields: [contactUserId], references: [id])
+
+  pets Pet[]
+
+  @@map("shelter_locations")
+}
+
+model PetNeedType {
+  id   Int    @id
+  name String @unique
+
+  petNeeds PetNeed[]
+
+  @@map("pet_need_types")
+}
+
+model HousingType {
+  id   Int    @id
+  name String @unique
+
+  requests AdoptionRequest[]
+
+  @@map("housing_types")
+}
+
+//==================================================
+// PETS
+//==================================================
+
+model Pet {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  breedId Int @map("breed_id")
+  genderId Int @map("gender_id")
+
+  estimatedBirthDate DateTime? @db.Date @map("estimated_birth_date")
+
+  sizeId Int @map("size_id")
+
+  description String?
+  rescueStory String? @map("rescue_story")
+
+  currentStatusId Int @map("current_status_id")
+  currentLocationId Int? @map("current_location_id")
+
+  featured Boolean @default(false)
+
+  createdBy Int @map("created_by")
+
+  createdAt DateTime @map("created_at")
+  updatedAt DateTime @map("updated_at")
+
+  breed Breed @relation(fields: [breedId], references: [id])
+
+  gender Gender @relation(fields: [genderId], references: [id])
+
+  size PetSize @relation(fields: [sizeId], references: [id])
+
+  currentStatus PetStatus @relation(fields: [currentStatusId], references: [id])
+
+  currentLocation ShelterLocation? @relation(fields: [currentLocationId], references: [id])
+
+  creator User @relation("PetCreatedBy", fields: [createdBy], references: [id])
+
+  colors PetColor[]
+
+  statusHistory PetStatusHistory[]
+
+  needs PetNeed[]
+
+  adoptionRequests AdoptionRequest[]
+
+  medicalRecords MedicalRecord[]
+
+  eventRegistrations EventRegistration[]
+
+  petFiles PetFile[]
+
+  @@map("pets")
+}
+
+model PetColor {
+
+  petId Int @map("pet_id")
+
+  colorId Int @map("color_id")
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  color Color @relation(fields: [colorId], references: [id])
+
+  @@id([petId, colorId])
+
+  @@map("pet_colors")
+}
+
+model PetStatusHistory {
+
+  id Int @id @default(autoincrement())
+
+  petId Int @map("pet_id")
+
+  statusId Int @map("status_id")
+
+  notes String?
+
+  changedBy Int @map("changed_by")
+
+  changedAt DateTime @map("changed_at")
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  status PetStatus @relation(fields: [statusId], references: [id])
+
+  changedByUser User @relation(fields: [changedBy], references: [id])
+
+  @@map("pet_status_history")
+}
+
+model PetNeed {
+
+  id Int @id @default(autoincrement())
+
+  petId Int @map("pet_id")
+
+  needTypeId Int @map("need_type_id")
+
+  title String
+
+  description String?
+
+  estimatedCost Decimal? @db.Decimal(10,2) @map("estimated_cost")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @map("created_at")
+
+  updatedAt DateTime @map("updated_at")
+
+  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  needType PetNeedType @relation(fields: [needTypeId], references: [id])
+
+  sponsorships Sponsorship[]
+
+  @@map("pet_needs")
+}
+
+model Sponsorship {
+
+  id Int @id @default(autoincrement())
+
+  petNeedId Int @map("pet_need_id")
+
+  donorId Int @map("donor_id")
+
+  amount Decimal @db.Decimal(10,2)
+
+  sponsoredAt DateTime @map("sponsored_at")
+
+  notes String?
+
+  petNeed PetNeed @relation(fields: [petNeedId], references: [id])
+
+  donor Donor @relation(fields: [donorId], references: [id])
+
+  @@map("sponsorships")
+}
