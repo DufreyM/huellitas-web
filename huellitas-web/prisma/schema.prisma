@@ -21,21 +21,13 @@ model User {
   roles                 UserRole[]
   createdPets           Pet[]                @relation("PetCreatedBy")
   shelterLocations      ShelterLocation[]
-  reviewedRequests      AdoptionRequest[]    @relation("ReviewedBy")
-  deliveredAdoptions    Adoption[]           @relation("DeliveredBy")
-  followups             AdoptionFollowup[]   @relation("PerformedBy")
-  receivedDonations     Donation[]           @relation("ReceivedBy")
-  medicalRecords        MedicalRecord[]      @relation("VeterinarianMedicalRecord")
-  vaccinations          Vaccination[]        @relation("VeterinarianVaccination")
-  dewormings            Deworming[]          @relation("VeterinarianDeworming")
-  surgeries             Surgery[]            @relation("VeterinarianSurgery")
-  createdEvents         Event[]
-  eventStaff            EventStaff[]
-  publishedStories      SuccessStory[]
-  notifications         Notification[]
-  uploadedFiles         File[]
-  auditLogs             AuditLog[]
-  adopter               Adopter?
+  petStatusChanges      PetStatusHistory[]
+
+  // Relations to AdoptionRequest, Adoption, AdoptionFollowup, Donation, MedicalRecord,
+  // Vaccination, Deworming, Surgery, Event, EventStaff, SuccessStory, Notification,
+  // File, AuditLog and Adopter were removed: those models don't exist yet, and Prisma
+  // fails to generate a client while any relation points at an undefined model.
+  // Re-add them alongside their real model definitions when those features are built.
 
   @@map("users")
 }
@@ -140,16 +132,12 @@ model AdoptionRequestStatus {
   isFinal  Boolean @default(false) @map("is_final")
   sortOrder Int?   @map("sort_order")
 
-  requests AdoptionRequest[]
-
   @@map("adoption_request_statuses")
 }
 
 model PaymentMethod {
   id   Int    @id
   name String @unique
-
-  donations Donation[]
 
   @@map("payment_methods")
 }
@@ -158,16 +146,12 @@ model DonationType {
   id   Int    @id
   name String @unique
 
-  donations Donation[]
-
   @@map("donation_types")
 }
 
 model EventType {
   id   Int    @id
   name String @unique
-
-  events Event[]
 
   @@map("event_types")
 }
@@ -177,8 +161,6 @@ model EventStatus {
   name      String  @unique
   isFinal   Boolean @default(false) @map("is_final")
   sortOrder Int?    @map("sort_order")
-
-  events Event[]
 
   @@map("event_statuses")
 }
@@ -214,9 +196,7 @@ model Municipality {
 
   department Department @relation(fields: [departmentId], references: [id])
 
-  adopters         Adopter[]
   shelterLocations ShelterLocation[]
-  locations        Location[]
 
   @@unique([departmentId, name])
   @@map("municipalities")
@@ -257,8 +237,6 @@ model HousingType {
   id   Int    @id
   name String @unique
 
-  requests AdoptionRequest[]
-
   @@map("housing_types")
 }
 
@@ -280,6 +258,14 @@ model Pet {
 
   description String?
   rescueStory String? @map("rescue_story")
+  temperament String?
+
+  // Stopgap display fields until File/PetFile and MedicalRecord/Vaccination/Deworming/
+  // Surgery models exist; move photo and health info there once those are built.
+  imageUrl    String?  @map("image_url")
+  weightLbs   Decimal? @db.Decimal(6, 2) @map("weight_lbs")
+  traits      String[] @default([])
+  healthNotes String[] @default([]) @map("health_notes")
 
   currentStatusId Int @map("current_status_id")
   currentLocationId Int? @map("current_location_id")
@@ -308,14 +294,6 @@ model Pet {
   statusHistory PetStatusHistory[]
 
   needs PetNeed[]
-
-  adoptionRequests AdoptionRequest[]
-
-  medicalRecords MedicalRecord[]
-
-  eventRegistrations EventRegistration[]
-
-  petFiles PetFile[]
 
   @@map("pets")
 }
@@ -382,28 +360,8 @@ model PetNeed {
 
   needType PetNeedType @relation(fields: [needTypeId], references: [id])
 
-  sponsorships Sponsorship[]
+  // Sponsorship model removed: it required a Donor model that was never defined.
+  // Re-add both once the donations feature is designed.
 
   @@map("pet_needs")
-}
-
-model Sponsorship {
-
-  id Int @id @default(autoincrement())
-
-  petNeedId Int @map("pet_need_id")
-
-  donorId Int @map("donor_id")
-
-  amount Decimal @db.Decimal(10,2)
-
-  sponsoredAt DateTime @map("sponsored_at")
-
-  notes String?
-
-  petNeed PetNeed @relation(fields: [petNeedId], references: [id])
-
-  donor Donor @relation(fields: [donorId], references: [id])
-
-  @@map("sponsorships")
 }
