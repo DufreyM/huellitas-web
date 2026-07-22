@@ -4,406 +4,297 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model User {
-  id           Int       @id @default(autoincrement())
-  fullName     String    @map("full_name")
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  phone        String?
-  profilePhoto String?   @map("profile_photo")
-  isActive     Boolean   @default(true) @map("is_active")
-  lastLogin    DateTime? @map("last_login")
-  createdAt    DateTime  @map("created_at")
-  updatedAt    DateTime  @map("updated_at")
+// =======================
+// ENUMS
+// =======================
 
-  roles                 UserRole[]
-  createdPets           Pet[]                @relation("PetCreatedBy")
-  shelterLocations      ShelterLocation[]
-  reviewedRequests      AdoptionRequest[]    @relation("ReviewedBy")
-  deliveredAdoptions    Adoption[]           @relation("DeliveredBy")
-  followups             AdoptionFollowup[]   @relation("PerformedBy")
-  receivedDonations     Donation[]           @relation("ReceivedBy")
-  medicalRecords        MedicalRecord[]      @relation("VeterinarianMedicalRecord")
-  vaccinations          Vaccination[]        @relation("VeterinarianVaccination")
-  dewormings            Deworming[]          @relation("VeterinarianDeworming")
-  surgeries             Surgery[]            @relation("VeterinarianSurgery")
-  createdEvents         Event[]
-  eventStaff            EventStaff[]
-  publishedStories      SuccessStory[]
-  notifications         Notification[]
-  uploadedFiles         File[]
-  auditLogs             AuditLog[]
-  adopter               Adopter?
+enum PetSpecies {
+  Perro
+  Gato
+}
+
+enum PetGender {
+  Macho
+  Hembra
+}
+
+enum PetSize {
+  Pequeno
+  Mediano
+  Grande
+}
+
+enum PetStatus {
+  Disponible
+  En_tratamiento
+  Reservada
+  Adoptada
+  No_disponible
+}
+
+enum MedicalRecordType {
+  Consulta
+  Desparasitacion
+  Tratamiento
+  Vacunacion
+  Castracion
+}
+
+enum AdoptionRequestStatus {
+  Pendiente
+  En_revision
+  Aprobada
+  Rechazada
+}
+
+enum EventType {
+  Jornada_adopcion
+  Jornada_vacunacion
+  Jornada_castracion
+  Feria
+  Recaudacion
+  Otro
+}
+
+enum EventStatus {
+  Programado
+  En_curso
+  Finalizado
+  Cancelado
+}
+
+enum ProcedureType {
+  Vacunacion
+  Castracion
+}
+
+enum PaymentMethod {
+  Efectivo
+  Transferencia
+  Deposito
+  Tarjeta
+  Otro
+}
+
+// =======================
+// MODELS
+// =======================
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  phone        String
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  events Event[]
 
   @@map("users")
 }
 
-model Role {
-  id          Int    @id
-  name        String @unique
-  description String?
-
-  users       UserRole[]
-  permissions RolePermission[]
-
-  @@map("roles")
-}
-
-model Permission {
-  id          Int    @id
-  name        String @unique
-  description String?
-
-  roles       RolePermission[]
-
-  @@map("permissions")
-}
-
-model UserRole {
-  userId Int @map("user_id")
-  roleId Int @map("role_id")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, roleId])
-  @@map("user_roles")
-}
-
-model RolePermission {
-  roleId       Int @map("role_id")
-  permissionId Int @map("permission_id")
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
-  @@map("role_permissions")
-}
-
-//==================================================
-// CATALOGS
-//==================================================
-
-model Species {
-  id        Int     @id
-  name      String  @unique
-  isActive  Boolean @default(true) @map("is_active")
-
-  breeds Breed[]
-
-  @@map("species")
-}
-
-model Gender {
-  id   Int    @id
-  name String @unique
-
-  pets Pet[]
-
-  @@map("genders")
-}
-
-model PetSize {
-  id   Int    @id
-  name String @unique
-
-  pets Pet[]
-
-  @@map("pet_sizes")
-}
-
-model PetStatus {
-  id   Int    @id
-  name String @unique
-
-  pets    Pet[]
-  history PetStatusHistory[]
-
-  @@map("pet_statuses")
-}
-
-model Department {
-  id   Int    @id
-  name String @unique
-
-  municipalities Municipality[]
-
-  @@map("departments")
-}
-
-model AdoptionRequestStatus {
-  id       Int     @id
-  name     String  @unique
-  isFinal  Boolean @default(false) @map("is_final")
-  sortOrder Int?   @map("sort_order")
-
-  requests AdoptionRequest[]
-
-  @@map("adoption_request_statuses")
-}
-
-model PaymentMethod {
-  id   Int    @id
-  name String @unique
-
-  donations Donation[]
-
-  @@map("payment_methods")
-}
-
-model DonationType {
-  id   Int    @id
-  name String @unique
-
-  donations Donation[]
-
-  @@map("donation_types")
-}
-
-model EventType {
-  id   Int    @id
-  name String @unique
-
-  events Event[]
-
-  @@map("event_types")
-}
-
-model EventStatus {
-  id        Int     @id
-  name      String  @unique
-  isFinal   Boolean @default(false) @map("is_final")
-  sortOrder Int?    @map("sort_order")
-
-  events Event[]
-
-  @@map("event_statuses")
-}
-
-model Breed {
-  id Int @id @default(autoincrement())
-
-  speciesId Int    @map("species_id")
-  name      String
-
-  species Species @relation(fields: [speciesId], references: [id])
-
-  pets Pet[]
-
-  @@unique([speciesId, name])
-  @@map("breeds")
-}
-
-model Color {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-
-  pets PetColor[]
-
-  @@map("colors")
-}
-
-model Municipality {
-  id Int @id @default(autoincrement())
-
-  departmentId Int    @map("department_id")
-  name         String
-
-  department Department @relation(fields: [departmentId], references: [id])
-
-  adopters         Adopter[]
-  shelterLocations ShelterLocation[]
-  locations        Location[]
-
-  @@unique([departmentId, name])
-  @@map("municipalities")
-}
-
-model ShelterLocation {
-  id Int @id @default(autoincrement())
-
-  name    String
-  type    String
-  address String?
-
-  municipalityId Int? @map("municipality_id")
-  contactUserId  Int? @map("contact_user_id")
-
-  isActive Boolean  @default(true) @map("is_active")
-  createdAt DateTime @map("created_at")
-
-  municipality Municipality? @relation(fields: [municipalityId], references: [id])
-
-  contactUser User? @relation(fields: [contactUserId], references: [id])
-
-  pets Pet[]
-
-  @@map("shelter_locations")
-}
-
-model PetNeedType {
-  id   Int    @id
-  name String @unique
-
-  petNeeds PetNeed[]
-
-  @@map("pet_need_types")
-}
-
-model HousingType {
-  id   Int    @id
-  name String @unique
-
-  requests AdoptionRequest[]
-
-  @@map("housing_types")
-}
-
-//==================================================
-// PETS
-//==================================================
-
 model Pet {
-  id Int @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
+  name         String
+  species      PetSpecies
+  breed        String
+  gender       PetGender
+  estimatedAge String     @map("estimated_age")
+  size         PetSize
+  weight       Decimal    @db.Decimal(5, 2)
+  color        String
+  description  String
+  rescueStory  String     @map("rescue_story")
+  status       PetStatus
+  featured     Boolean    @default(false)
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at")
 
-  name String
-
-  breedId Int @map("breed_id")
-  genderId Int @map("gender_id")
-
-  estimatedBirthDate DateTime? @db.Date @map("estimated_birth_date")
-
-  sizeId Int @map("size_id")
-
-  description String?
-  rescueStory String? @map("rescue_story")
-
-  currentStatusId Int @map("current_status_id")
-  currentLocationId Int? @map("current_location_id")
-
-  featured Boolean @default(false)
-
-  createdBy Int @map("created_by")
-
-  createdAt DateTime @map("created_at")
-  updatedAt DateTime @map("updated_at")
-
-  breed Breed @relation(fields: [breedId], references: [id])
-
-  gender Gender @relation(fields: [genderId], references: [id])
-
-  size PetSize @relation(fields: [sizeId], references: [id])
-
-  currentStatus PetStatus @relation(fields: [currentStatusId], references: [id])
-
-  currentLocation ShelterLocation? @relation(fields: [currentLocationId], references: [id])
-
-  creator User @relation("PetCreatedBy", fields: [createdBy], references: [id])
-
-  colors PetColor[]
-
-  statusHistory PetStatusHistory[]
-
-  needs PetNeed[]
-
+  images           PetImage[]
+  medicalRecords   MedicalRecord[]
   adoptionRequests AdoptionRequest[]
-
-  medicalRecords MedicalRecord[]
-
-  eventRegistrations EventRegistration[]
-
-  petFiles PetFile[]
+  adoptions        Adoption[]
+  successStories   SuccessStory[]
 
   @@map("pets")
 }
 
-model PetColor {
+model PetImage {
+  id       Int     @id @default(autoincrement())
+  petId    Int     @map("pet_id")
+  imageUrl String  @map("image_url")
+  isCover  Boolean @default(false) @map("is_cover")
 
-  petId Int @map("pet_id")
+  pet Pet @relation(fields: [petId], references: [id])
 
-  colorId Int @map("color_id")
-
-  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
-
-  color Color @relation(fields: [colorId], references: [id])
-
-  @@id([petId, colorId])
-
-  @@map("pet_colors")
+  @@map("pet_images")
 }
 
-model PetStatusHistory {
+model MedicalRecord {
+  id               Int               @id @default(autoincrement())
+  petId            Int               @map("pet_id")
+  consultationDate DateTime          @map("consultation_date") @db.Date
+  recordType       MedicalRecordType @map("record_type")
+  description      String
+  treatment        String
+  observations     String
 
-  id Int @id @default(autoincrement())
+  pet Pet @relation(fields: [petId], references: [id])
 
-  petId Int @map("pet_id")
-
-  statusId Int @map("status_id")
-
-  notes String?
-
-  changedBy Int @map("changed_by")
-
-  changedAt DateTime @map("changed_at")
-
-  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
-
-  status PetStatus @relation(fields: [statusId], references: [id])
-
-  changedByUser User @relation(fields: [changedBy], references: [id])
-
-  @@map("pet_status_history")
+  @@map("medical_records")
 }
 
-model PetNeed {
+model Adopter {
+  id           Int      @id @default(autoincrement())
+  fullName     String   @map("full_name")
+  dpi          String   @unique
+  phone        String
+  email        String
+  address      String
+  municipality String
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  id Int @id @default(autoincrement())
+  adoptionRequests AdoptionRequest[]
+  adoptions        Adoption[]
 
-  petId Int @map("pet_id")
-
-  needTypeId Int @map("need_type_id")
-
-  title String
-
-  description String?
-
-  estimatedCost Decimal? @db.Decimal(10,2) @map("estimated_cost")
-
-  isActive Boolean @default(true) @map("is_active")
-
-  createdAt DateTime @map("created_at")
-
-  updatedAt DateTime @map("updated_at")
-
-  pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
-
-  needType PetNeedType @relation(fields: [needTypeId], references: [id])
-
-  sponsorships Sponsorship[]
-
-  @@map("pet_needs")
+  @@map("adopters")
 }
 
-model Sponsorship {
+model AdoptionRequest {
+  id              Int                   @id @default(autoincrement())
+  adopterId       Int                   @map("adopter_id")
+  petId           Int                   @map("pet_id")
+  status          AdoptionRequestStatus
+  reason          String
+  hasChildren     Boolean               @map("has_children")
+  familyAgreement Boolean               @map("family_agreement")
+  hasVeterinarian Boolean               @map("has_veterinarian")
+  secureSpace     Boolean               @map("secure_space")
+  submittedAt     DateTime              @default(now()) @map("submitted_at")
 
-  id Int @id @default(autoincrement())
+  adopter Adopter @relation(fields: [adopterId], references: [id])
+  pet     Pet     @relation(fields: [petId], references: [id])
 
-  petNeedId Int @map("pet_need_id")
+  adoption Adoption?
 
-  donorId Int @map("donor_id")
+  @@map("adoption_requests")
+}
 
-  amount Decimal @db.Decimal(10,2)
+model Adoption {
+  id           Int      @id @default(autoincrement())
+  adopterId    Int      @map("adopter_id")
+  petId        Int      @map("pet_id")
+  requestId    Int      @unique @map("request_id")
+  adoptionDate DateTime @map("adoption_date") @db.Date
+  isReturned   Boolean  @default(false) @map("is_returned")
+  returnReason String?  @map("return_reason")
+  observations String?
 
-  sponsoredAt DateTime @map("sponsored_at")
+  adopter Adopter         @relation(fields: [adopterId], references: [id])
+  pet     Pet             @relation(fields: [petId], references: [id])
+  request AdoptionRequest @relation(fields: [requestId], references: [id])
 
-  notes String?
+  @@map("adoptions")
+}
 
-  petNeed PetNeed @relation(fields: [petNeedId], references: [id])
+model Event {
+  id          Int         @id @default(autoincrement())
+  title       String
+  type        EventType
+  description String
+  location    String
+  startDate   DateTime    @map("start_date")
+  endDate     DateTime    @map("end_date")
+  status      EventStatus
+  createdBy   Int         @map("created_by")
+  isActive    Boolean     @default(true) @map("is_active")
+  createdAt   DateTime    @default(now()) @map("created_at")
 
-  donor Donor @relation(fields: [donorId], references: [id])
+  creator       User                @relation(fields: [createdBy], references: [id])
+  registrations EventRegistration[]
 
-  @@map("sponsorships")
+  @@map("events")
+}
+
+model EventRegistration {
+  id            Int           @id @default(autoincrement())
+  eventId       Int           @map("event_id")
+  petName       String        @map("pet_name")
+  species       PetSpecies
+  breed         String
+  ownerName     String        @map("owner_name")
+  ownerPhone    String        @map("owner_phone")
+  procedureType ProcedureType @map("procedure_type")
+  notes         String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  event Event @relation(fields: [eventId], references: [id])
+
+  @@map("event_registrations")
+}
+
+model Donation {
+  id            Int           @id @default(autoincrement())
+  donorName     String        @map("donor_name")
+  donorEmail    String        @map("donor_email")
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentMethod PaymentMethod @map("payment_method")
+  donationDate  DateTime      @default(now()) @map("donation_date")
+  notes         String?
+
+  @@map("donations")
+}
+
+model Supply {
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  currentStock Decimal @map("current_stock") @db.Decimal(10, 2)
+  unit         String
+
+  donations SupplyDonation[]
+
+  @@map("supplies")
+}
+
+model SupplyDonation {
+  id           Int      @id @default(autoincrement())
+  supplyId     Int      @map("supply_id")
+  quantity     Decimal  @db.Decimal(10, 2)
+  donorName    String   @map("donor_name")
+  donationDate DateTime @default(now()) @map("donation_date")
+  notes        String?
+
+  supply Supply @relation(fields: [supplyId], references: [id])
+
+  @@map("supply_donations")
+}
+
+model SuccessStory {
+  id              Int      @id @default(autoincrement())
+  petId           Int      @map("pet_id")
+  title           String
+  content         String
+  imageUrl        String   @map("image_url")
+  publicationDate DateTime @map("publication_date") @db.Date
+
+  pet Pet @relation(fields: [petId], references: [id])
+
+  @@map("success_stories")
+}
+
+model Contact {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contacts")
 }
