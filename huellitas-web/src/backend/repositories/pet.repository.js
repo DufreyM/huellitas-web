@@ -27,18 +27,55 @@ async function getPetById(id) {
 }
 
 async function createPet(data) {
+    const { images, ...petData } = data;
+
     return prisma.pet.create({
-        data
+        data: {
+            ...petData,
+            images: images?.length ? { create: images } : undefined
+        },
+        include: {
+            images: true
+        }
     });
 }
 
 async function updatePet(id, data) {
-    return prisma.pet.update({
-        where: {
-            id
-        },
-        data
-    });
+    const { images, ...petData } = data;
+
+    if (!images) {
+        return prisma.pet.update({
+            where: {
+                id
+            },
+            data: petData,
+            include: {
+                images: true
+            }
+        });
+    }
+
+    const [, updatedPet] = await prisma.$transaction([
+        prisma.petImage.deleteMany({
+            where: {
+                petId: id
+            }
+        }),
+        prisma.pet.update({
+            where: {
+                id
+            },
+            data: {
+                ...petData,
+                images: images.length ? { create: images } : undefined
+            },
+            include: {
+                images: true
+            }
+        })
+    ]);
+
+    return updatedPet;
 }
 
 async function deletePet(id) {

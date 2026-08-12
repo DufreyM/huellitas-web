@@ -39,7 +39,14 @@ const createPetSchema = z.object({
         "No_disponible"
     ]),
 
-    featured: z.boolean().optional()
+    featured: z.boolean().optional(),
+
+    images: z.array(
+        z.object({
+            imageUrl: z.string().min(1),
+            isCover: z.boolean().optional()
+        })
+    ).optional()
 });
 
 const updatePetSchema = createPetSchema.partial();
