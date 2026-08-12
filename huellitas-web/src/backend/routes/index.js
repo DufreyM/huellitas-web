@@ -1,6 +1,7 @@
 const express = require("express");
 
 const petRoutes = require("./pet.routes");
+const authRoutes = require("./auth.routes");
 
 const router = express.Router();
 
@@ -19,5 +20,6 @@ router.get("/error", (req, res, next) => {
 });
 
 router.use("/pets", petRoutes);
+router.use("/auth", authRoutes);
 
 module.exports = router;
