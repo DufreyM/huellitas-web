@@ -4,6 +4,8 @@ const petRoutes = require("./pet.routes");
 const authRoutes = require("./auth.routes");
 const userRoutes = require("./user.routes");
 const adoptionRoutes = require("./adoption.routes");
+const eventRoutes = require("./event.routes");
+const donationRoutes = require("./donation.routes");
 
 const router = express.Router();
 
@@ -25,5 +27,7 @@ router.use("/pets", petRoutes);
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/adoption-requests", adoptionRoutes);
+router.use("/events", eventRoutes);
+router.use("/donations", donationRoutes);
 
 module.exports = router;

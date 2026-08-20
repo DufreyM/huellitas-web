@@ -52,6 +52,11 @@ async function createAdoptionRequest(data) {
     });
 }
 
+async function listAdoptionRequests() {
+    return await adoptionRepository.getAllAdoptionRequests();
+}
+
 module.exports = {
-    createAdoptionRequest
+    createAdoptionRequest,
+    listAdoptionRequests
 };

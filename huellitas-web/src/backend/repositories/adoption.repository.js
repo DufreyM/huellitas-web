@@ -28,9 +28,22 @@ async function createAdoptionRequest(data) {
     });
 }
 
+async function getAllAdoptionRequests() {
+    return prisma.adoptionRequest.findMany({
+        include: {
+            adopter: true,
+            pet: true
+        },
+        orderBy: {
+            submittedAt: "desc"
+        }
+    });
+}
+
 module.exports = {
     findAdopterByDpi,
     createAdopter,
     findPetById,
-    createAdoptionRequest
+    createAdoptionRequest,
+    getAllAdoptionRequests
 };

@@ -14,6 +14,19 @@ const createAdoptionRequest = asyncHandler(async (req, res) => {
     );
 });
 
+const getAllAdoptionRequests = asyncHandler(async (req, res) => {
+    const adoptionRequests = await adoptionService.listAdoptionRequests();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Solicitudes de adopción obtenidas correctamente",
+            adoptionRequests
+        )
+    );
+});
+
 module.exports = {
-    createAdoptionRequest
+    createAdoptionRequest,
+    getAllAdoptionRequests
 };
