@@ -26,6 +26,17 @@ function protect(req, res, next) {
     }
 }
 
+function authorize(...allowedRoles) {
+    return (req, res, next) => {
+        if (!allowedRoles.includes(req.user.role)) {
+            return next(new ApiError(403, "No tenés permisos para esta acción"));
+        }
+
+        next();
+    };
+}
+
 module.exports = {
-    protect
+    protect,
+    authorize
 };
