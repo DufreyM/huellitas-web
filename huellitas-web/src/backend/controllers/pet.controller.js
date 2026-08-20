@@ -3,7 +3,9 @@ const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
 
 const getAllPets = asyncHandler(async (req, res) => {
-    const pets = await petService.getAllPets();
+    const availableOnly = req.query.availableOnly === "true";
+
+    const pets = await petService.getAllPets({ availableOnly });
 
     return res.status(200).json(
         new ApiResponse(

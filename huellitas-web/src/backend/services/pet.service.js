@@ -1,8 +1,16 @@
 const petRepository = require("../repositories/pet.repository");
 const ApiError = require("../utils/ApiError");
 
-async function getAllPets() {
-    return await petRepository.getAllPets();
+const VALID_STATUS_TRANSITIONS = {
+    Disponible: ["En_tratamiento", "Reservada", "No_disponible"],
+    En_tratamiento: ["Disponible", "No_disponible"],
+    Reservada: ["Adoptada", "Disponible", "No_disponible"],
+    Adoptada: ["En_tratamiento", "No_disponible"],
+    No_disponible: ["Disponible", "En_tratamiento"]
+};
+
+async function getAllPets(options) {
+    return await petRepository.getAllPets(options);
 }
 
 async function getPetById(id) {
@@ -20,7 +28,18 @@ async function createPet(data) {
 }
 
 async function updatePet(id, data) {
-    await getPetById(id);
+    const currentPet = await getPetById(id);
+
+    if (data.status && data.status !== currentPet.status) {
+        const allowedNextStatuses = VALID_STATUS_TRANSITIONS[currentPet.status] || [];
+
+        if (!allowedNextStatuses.includes(data.status)) {
+            throw new ApiError(
+                400,
+                `Transición de estado inválida: ${currentPet.status} → ${data.status}`
+            );
+        }
+    }
 
     return await petRepository.updatePet(id, data);
 }

@@ -1,9 +1,14 @@
 const prisma = require("../config/prisma");
 
-async function getAllPets() {
+async function getAllPets({ availableOnly = false } = {}) {
     return prisma.pet.findMany({
         where: {
-            isActive: true
+            isActive: true,
+            ...(availableOnly && {
+                status: {
+                    notIn: ["Adoptada", "En_tratamiento"]
+                }
+            })
         },
         include: {
             images: true
