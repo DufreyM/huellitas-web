@@ -2,6 +2,8 @@ const express = require("express");
 
 const petRoutes = require("./pet.routes");
 const authRoutes = require("./auth.routes");
+const userRoutes = require("./user.routes");
+const adoptionRoutes = require("./adoption.routes");
 
 const router = express.Router();
 
@@ -21,5 +23,7 @@ router.get("/error", (req, res, next) => {
 
 router.use("/pets", petRoutes);
 router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
+router.use("/adoption-requests", adoptionRoutes);
 
 module.exports = router;
