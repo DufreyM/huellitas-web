@@ -24,7 +24,7 @@ async function main() {
         },
         update: {
             passwordHash,
-            role: "Administrador",
+            role: "Superadministrador",
             isActive: true
         },
         create: {

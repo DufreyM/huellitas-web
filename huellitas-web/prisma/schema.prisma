@@ -80,8 +80,9 @@ enum PaymentMethod {
 }
 
 enum UserRole {
-  Administrador
+  Superadministrador
   Voluntario
+  Operador
 }
 
 // =======================
@@ -97,6 +98,9 @@ model User {
   role         UserRole @default(Voluntario)
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
+
+  passwordResetTokenHash String?   @map("password_reset_token_hash")
+  passwordResetExpires   DateTime? @map("password_reset_expires")
 
   events Event[]
 
