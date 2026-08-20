@@ -28,7 +28,35 @@ const me = asyncHandler(async (req, res) => {
     );
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    const result = await authService.forgotPassword(email);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            result.message
+        )
+    );
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const { token, password } = req.body;
+
+    await authService.resetPassword(token, password);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Contraseña restablecida correctamente"
+        )
+    );
+});
+
 module.exports = {
     login,
-    me
+    me,
+    forgotPassword,
+    resetPassword
 };

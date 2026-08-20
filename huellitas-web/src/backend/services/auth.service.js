@@ -1,9 +1,16 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const userRepository = require("../repositories/user.repository");
 const ApiError = require("../utils/ApiError");
 const jwtConfig = require("../config/jwt");
+
+const PASSWORD_RESET_EXPIRES_MINUTES = 60;
+
+function hashResetToken(token) {
+    return crypto.createHash("sha256").update(token).digest("hex");
+}
 
 function sanitizeUser(user) {
     const { passwordHash, ...safeUser } = user;
@@ -51,7 +58,51 @@ async function getMe(userId) {
     return sanitizeUser(user);
 }
 
+async function forgotPassword(email) {
+    const user = await userRepository.findByEmail(email);
+    const genericMessage = "Si el correo existe en el sistema, se envió un enlace de recuperación";
+
+    if (!user || !user.isActive) {
+        return { message: genericMessage };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const passwordResetExpires = new Date(Date.now() + PASSWORD_RESET_EXPIRES_MINUTES * 60 * 1000);
+
+    await userRepository.update(user.id, {
+        passwordResetTokenHash: hashResetToken(resetToken),
+        passwordResetExpires
+    });
+
+    // No hay un servicio de email configurado en el proyecto todavía:
+    // se registra el enlace en la consola del servidor como stub temporal.
+    console.log(
+        `🔑 Enlace de recuperación para ${user.email}: /reset-password?token=${resetToken}`
+    );
+
+    return { message: genericMessage };
+}
+
+async function resetPassword(token, newPassword) {
+    const tokenHash = hashResetToken(token);
+    const user = await userRepository.findByResetTokenHash(tokenHash);
+
+    if (!user || !user.passwordResetExpires || user.passwordResetExpires < new Date()) {
+        throw new ApiError(400, "El enlace de recuperación es inválido o expiró");
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await userRepository.update(user.id, {
+        passwordHash,
+        passwordResetTokenHash: null,
+        passwordResetExpires: null
+    });
+}
+
 module.exports = {
     login,
-    getMe
+    getMe,
+    forgotPassword,
+    resetPassword
 };
