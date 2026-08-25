@@ -6,6 +6,8 @@ const userRoutes = require("./user.routes");
 const adoptionRoutes = require("./adoption.routes");
 const eventRoutes = require("./event.routes");
 const donationRoutes = require("./donation.routes");
+const medicalRecordRoutes = require("./medicalRecord.routes");
+const eventRegistrationRoutes = require("./eventRegistration.routes");
 
 const router = express.Router();
 
@@ -29,5 +31,7 @@ router.use("/users", userRoutes);
 router.use("/adoption-requests", adoptionRoutes);
 router.use("/events", eventRoutes);
 router.use("/donations", donationRoutes);
+router.use("/medical-records", medicalRecordRoutes);
+router.use("/event-registrations", eventRegistrationRoutes);
 
 module.exports = router;
