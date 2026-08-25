@@ -54,9 +54,36 @@ const resetPassword = asyncHandler(async (req, res) => {
     );
 });
 
+const updateMe = asyncHandler(async (req, res) => {
+    const user = await authService.updateProfile(req.user.id, req.body);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Perfil actualizado correctamente",
+            user
+        )
+    );
+});
+
+const changePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    await authService.changePassword(req.user.id, currentPassword, newPassword);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Contraseña actualizada correctamente"
+        )
+    );
+});
+
 module.exports = {
     login,
     me,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    updateMe,
+    changePassword
 };
