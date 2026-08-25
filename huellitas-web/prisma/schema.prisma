@@ -101,6 +101,7 @@ model User {
 
   passwordResetTokenHash String?   @map("password_reset_token_hash")
   passwordResetExpires   DateTime? @map("password_reset_expires")
+  lastLoginAt            DateTime? @map("last_login_at")
 
   events Event[]
 

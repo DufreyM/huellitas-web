@@ -22,6 +22,7 @@ describe("auth.service — login", () => {
 
     it("genera un token cuando las credenciales son válidas", async () => {
         userRepository.findByEmail.mockResolvedValue(baseUser);
+        userRepository.update.mockResolvedValue(baseUser);
         bcrypt.compare.mockResolvedValue(true);
         jwt.sign.mockReturnValue("fake.jwt.token");
 
@@ -62,5 +63,29 @@ describe("auth.service — login", () => {
         await expect(authService.login("admin@huellitas.org", "correcta")).rejects.toMatchObject({
             statusCode: 401
         });
+    });
+});
+
+describe("auth.service — changePassword", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("actualiza la contraseña cuando la actual es correcta", async () => {
+        userRepository.findById.mockResolvedValue(baseUser);
+        bcrypt.compare.mockResolvedValue(true);
+        bcrypt.hash.mockResolvedValue("nuevo-hash");
+
+        await authService.changePassword(1, "actual", "nueva12345");
+
+        expect(userRepository.update).toHaveBeenCalledWith(1, { passwordHash: "nuevo-hash" });
+    });
+
+    it("rechaza si la contraseña actual es incorrecta", async () => {
+        userRepository.findById.mockResolvedValue(baseUser);
+        bcrypt.compare.mockResolvedValue(false);
+
+        await expect(authService.changePassword(1, "mala", "nueva12345")).rejects.toMatchObject({ statusCode: 400 });
+        expect(userRepository.update).not.toHaveBeenCalled();
     });
 });

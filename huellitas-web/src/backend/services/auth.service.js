@@ -13,7 +13,7 @@ function hashResetToken(token) {
 }
 
 function sanitizeUser(user) {
-    const { passwordHash, ...safeUser } = user;
+    const { passwordHash, passwordResetTokenHash, passwordResetExpires, ...safeUser } = user;
 
     return safeUser;
 }
@@ -42,9 +42,13 @@ async function login(email, password) {
         }
     );
 
+    const updatedUser = await userRepository.update(user.id, {
+        lastLoginAt: new Date()
+    });
+
     return {
         token,
-        user: sanitizeUser(user)
+        user: sanitizeUser(updatedUser)
     };
 }
 
@@ -100,9 +104,35 @@ async function resetPassword(token, newPassword) {
     });
 }
 
+async function updateProfile(userId, { name, phone }) {
+    const updatedUser = await userRepository.update(userId, { name, phone });
+
+    return sanitizeUser(updatedUser);
+}
+
+async function changePassword(userId, currentPassword, newPassword) {
+    const user = await userRepository.findById(userId);
+
+    if (!user) {
+        throw new ApiError(404, "Usuario no encontrado");
+    }
+
+    const passwordMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+
+    if (!passwordMatches) {
+        throw new ApiError(400, "La contraseña actual es incorrecta");
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await userRepository.update(userId, { passwordHash });
+}
+
 module.exports = {
     login,
     getMe,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    updateProfile,
+    changePassword
 };
