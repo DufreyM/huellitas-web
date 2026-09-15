@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const userRepository = require("../repositories/user.repository");
 const ApiError = require("../utils/ApiError");
 const jwtConfig = require("../config/jwt");
+const mailService = require("./mail.service");
 
 const PASSWORD_RESET_EXPIRES_MINUTES = 60;
 
@@ -78,11 +79,9 @@ async function forgotPassword(email) {
         passwordResetExpires
     });
 
-    // No hay un servicio de email configurado en el proyecto todavía:
-    // se registra el enlace en la consola del servidor como stub temporal.
-    console.log(
-        `🔑 Enlace de recuperación para ${user.email}: /reset-password?token=${resetToken}`
-    );
+    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`;
+
+    await mailService.sendPasswordResetEmail(user.email, resetUrl);
 
     return { message: genericMessage };
 }
