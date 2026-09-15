@@ -16,7 +16,7 @@ router.post(
 router.get(
     "/",
     protect,
-    authorize("Superadministrador", "Operador"),
+    authorize("Superadministrador", "Operador", "Voluntario"),
     eventRegistrationController.getAllRegistrations
 );
 
