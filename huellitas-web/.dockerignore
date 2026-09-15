@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.env
+.env.*
+!.env.example
+coverage
+uploads/*
+!uploads/.gitkeep
+src/app
+.next
+public
+.git
+.github
