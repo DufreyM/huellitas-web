@@ -8,6 +8,7 @@ const eventRoutes = require("./event.routes");
 const donationRoutes = require("./donation.routes");
 const medicalRecordRoutes = require("./medicalRecord.routes");
 const eventRegistrationRoutes = require("./eventRegistration.routes");
+const uploadRoutes = require("./upload.routes");
 
 const router = express.Router();
 
@@ -33,5 +34,6 @@ router.use("/events", eventRoutes);
 router.use("/donations", donationRoutes);
 router.use("/medical-records", medicalRecordRoutes);
 router.use("/event-registrations", eventRegistrationRoutes);
+router.use("/uploads", uploadRoutes);
 
 module.exports = router;

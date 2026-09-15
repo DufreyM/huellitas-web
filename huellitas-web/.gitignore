@@ -13,6 +13,10 @@
 # testing
 /coverage
 
+# uploaded pet images (local disk storage)
+/uploads/*
+!/uploads/.gitkeep
+
 # next.js
 /.next/
 /out/

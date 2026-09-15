@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -25,6 +26,17 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth/login", authRateLimiter);
 app.use("/api/auth/forgot-password", authRateLimiter);
+
+// El frontend (otro origen) necesita poder cargar estas imágenes en <img>,
+// así que se relaja el Cross-Origin-Resource-Policy solo para esta ruta.
+app.use(
+    "/uploads",
+    (req, res, next) => {
+        res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+        next();
+    },
+    express.static(path.join(__dirname, "../../uploads"))
+);
 
 app.use("/api", routes);
 app.use(notFound);
