@@ -26,6 +26,11 @@ const createAdoptionRequestSchema = z.object({
     secureSpace: z.boolean()
 });
 
+const updateAdoptionRequestStatusSchema = z.object({
+    status: z.enum(["Pendiente", "En_revision", "Aprobada", "Rechazada"])
+});
+
 module.exports = {
-    createAdoptionRequestSchema
+    createAdoptionRequestSchema,
+    updateAdoptionRequestStatusSchema
 };

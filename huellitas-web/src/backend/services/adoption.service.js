@@ -56,7 +56,18 @@ async function listAdoptionRequests() {
     return await adoptionRepository.getAllAdoptionRequests();
 }
 
+async function updateAdoptionRequestStatus(id, status) {
+    const existing = await adoptionRepository.findById(id);
+
+    if (!existing) {
+        throw new ApiError(404, "Solicitud de adopción no encontrada");
+    }
+
+    return await adoptionRepository.updateStatus(id, status);
+}
+
 module.exports = {
     createAdoptionRequest,
-    listAdoptionRequests
+    listAdoptionRequests,
+    updateAdoptionRequestStatus
 };

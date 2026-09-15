@@ -26,7 +26,23 @@ const getAllAdoptionRequests = asyncHandler(async (req, res) => {
     );
 });
 
+const updateAdoptionRequestStatus = asyncHandler(async (req, res) => {
+    const adoptionRequest = await adoptionService.updateAdoptionRequestStatus(
+        Number(req.params.id),
+        req.body.status
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Estado de la solicitud actualizado correctamente",
+            adoptionRequest
+        )
+    );
+});
+
 module.exports = {
     createAdoptionRequest,
-    getAllAdoptionRequests
+    getAllAdoptionRequests,
+    updateAdoptionRequestStatus
 };

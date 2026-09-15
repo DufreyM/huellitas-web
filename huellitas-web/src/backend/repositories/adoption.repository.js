@@ -40,10 +40,33 @@ async function getAllAdoptionRequests() {
     });
 }
 
+async function findById(id) {
+    return prisma.adoptionRequest.findUnique({
+        where: { id },
+        include: {
+            adopter: true,
+            pet: true
+        }
+    });
+}
+
+async function updateStatus(id, status) {
+    return prisma.adoptionRequest.update({
+        where: { id },
+        data: { status },
+        include: {
+            adopter: true,
+            pet: true
+        }
+    });
+}
+
 module.exports = {
     findAdopterByDpi,
     createAdopter,
     findPetById,
     createAdoptionRequest,
-    getAllAdoptionRequests
+    getAllAdoptionRequests,
+    findById,
+    updateStatus
 };
