@@ -5,6 +5,7 @@ async function getAllDonations({ skip, limit } = {}) {
     return await donationRepository.getAllDonations({ skip, limit });
 }
 
+
 async function getDonationById(id) {
     const donation = await donationRepository.getDonationById(id);
 
