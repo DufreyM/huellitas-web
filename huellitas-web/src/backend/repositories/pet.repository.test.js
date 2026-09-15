@@ -3,7 +3,8 @@ jest.mock("../config/prisma", () => ({
         findMany: jest.fn(),
         findUnique: jest.fn(),
         create: jest.fn(),
-        update: jest.fn()
+        update: jest.fn(),
+        count: jest.fn()
     },
     petImage: {
         deleteMany: jest.fn()
@@ -21,6 +22,7 @@ describe("pet.repository — acceso a datos", () => {
 
     it("getAllPets consulta solo mascotas activas por defecto", async () => {
         prisma.pet.findMany.mockResolvedValue([]);
+        prisma.pet.count.mockResolvedValue(0);
 
         await petRepository.getAllPets();
 
@@ -33,6 +35,7 @@ describe("pet.repository — acceso a datos", () => {
 
     it("getAllPets agrega el filtro de status cuando availableOnly es true", async () => {
         prisma.pet.findMany.mockResolvedValue([]);
+        prisma.pet.count.mockResolvedValue(0);
 
         await petRepository.getAllPets({ availableOnly: true });
 
@@ -43,6 +46,26 @@ describe("pet.repository — acceso a datos", () => {
                     status: { notIn: ["Adoptada", "En_tratamiento"] }
                 }
             })
+        );
+    });
+
+    it("getAllPets devuelve items y el total de mascotas que cumplen el filtro", async () => {
+        prisma.pet.findMany.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+        prisma.pet.count.mockResolvedValue(2);
+
+        const result = await petRepository.getAllPets();
+
+        expect(result).toEqual({ items: [{ id: 1 }, { id: 2 }], total: 2 });
+    });
+
+    it("getAllPets aplica skip y take cuando se pide paginación", async () => {
+        prisma.pet.findMany.mockResolvedValue([]);
+        prisma.pet.count.mockResolvedValue(0);
+
+        await petRepository.getAllPets({ skip: 20, limit: 10 });
+
+        expect(prisma.pet.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({ skip: 20, take: 10 })
         );
     });
 

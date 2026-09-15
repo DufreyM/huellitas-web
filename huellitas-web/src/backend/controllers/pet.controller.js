@@ -1,17 +1,19 @@
 const petService = require("../services/pet.service");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
+const { parsePagination, buildPaginatedResult } = require("../utils/pagination");
 
 const getAllPets = asyncHandler(async (req, res) => {
     const availableOnly = req.query.availableOnly === "true";
+    const { page, limit, skip } = parsePagination(req.query);
 
-    const pets = await petService.getAllPets({ availableOnly });
+    const { items, total } = await petService.getAllPets({ availableOnly, skip, limit });
 
     return res.status(200).json(
         new ApiResponse(
             200,
             "Mascotas obtenidas correctamente",
-            pets
+            buildPaginatedResult(items, total, page, limit)
         )
     );
 });

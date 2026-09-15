@@ -1,8 +1,8 @@
 const donationRepository = require("../repositories/donation.repository");
 const ApiError = require("../utils/ApiError");
 
-async function getAllDonations() {
-    return await donationRepository.getAllDonations();
+async function getAllDonations({ skip, limit } = {}) {
+    return await donationRepository.getAllDonations({ skip, limit });
 }
 
 async function getDonationById(id) {

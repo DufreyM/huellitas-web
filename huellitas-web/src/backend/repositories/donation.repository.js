@@ -1,11 +1,18 @@
 const prisma = require("../config/prisma");
 
-async function getAllDonations() {
-    return prisma.donation.findMany({
-        orderBy: {
-            donationDate: "desc"
-        }
-    });
+async function getAllDonations({ skip, limit } = {}) {
+    const [items, total] = await Promise.all([
+        prisma.donation.findMany({
+            orderBy: {
+                donationDate: "desc"
+            },
+            skip,
+            take: limit
+        }),
+        prisma.donation.count()
+    ]);
+
+    return { items, total };
 }
 
 async function getDonationById(id) {

@@ -52,8 +52,8 @@ async function createAdoptionRequest(data) {
     });
 }
 
-async function listAdoptionRequests() {
-    return await adoptionRepository.getAllAdoptionRequests();
+async function listAdoptionRequests({ skip, limit } = {}) {
+    return await adoptionRepository.getAllAdoptionRequests({ skip, limit });
 }
 
 async function updateAdoptionRequestStatus(id, status) {

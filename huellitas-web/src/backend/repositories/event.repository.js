@@ -1,14 +1,21 @@
 const prisma = require("../config/prisma");
 
-async function getAllEvents() {
-    return prisma.event.findMany({
-        where: {
-            isActive: true
-        },
-        orderBy: {
-            startDate: "asc"
-        }
-    });
+async function getAllEvents({ skip, limit } = {}) {
+    const [items, total] = await Promise.all([
+        prisma.event.findMany({
+            where: {
+                isActive: true
+            },
+            orderBy: {
+                startDate: "asc"
+            },
+            skip,
+            take: limit
+        }),
+        prisma.event.count({ where: { isActive: true } })
+    ]);
+
+    return { items, total };
 }
 
 async function getEventById(id) {

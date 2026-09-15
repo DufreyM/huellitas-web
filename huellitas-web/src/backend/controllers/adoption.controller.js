@@ -1,6 +1,7 @@
 const adoptionService = require("../services/adoption.service");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
+const { parsePagination, buildPaginatedResult } = require("../utils/pagination");
 
 const createAdoptionRequest = asyncHandler(async (req, res) => {
     const adoptionRequest = await adoptionService.createAdoptionRequest(req.body);
@@ -15,13 +16,14 @@ const createAdoptionRequest = asyncHandler(async (req, res) => {
 });
 
 const getAllAdoptionRequests = asyncHandler(async (req, res) => {
-    const adoptionRequests = await adoptionService.listAdoptionRequests();
+    const { page, limit, skip } = parsePagination(req.query);
+    const { items, total } = await adoptionService.listAdoptionRequests({ skip, limit });
 
     return res.status(200).json(
         new ApiResponse(
             200,
             "Solicitudes de adopción obtenidas correctamente",
-            adoptionRequests
+            buildPaginatedResult(items, total, page, limit)
         )
     );
 });

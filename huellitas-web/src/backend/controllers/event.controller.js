@@ -1,12 +1,14 @@
 const eventService = require("../services/event.service");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
+const { parsePagination, buildPaginatedResult } = require("../utils/pagination");
 
 const getAllEvents = asyncHandler(async (req, res) => {
-    const events = await eventService.getAllEvents();
+    const { page, limit, skip } = parsePagination(req.query);
+    const { items, total } = await eventService.getAllEvents({ skip, limit });
 
     return res.status(200).json(
-        new ApiResponse(200, "Eventos obtenidos correctamente", events)
+        new ApiResponse(200, "Eventos obtenidos correctamente", buildPaginatedResult(items, total, page, limit))
     );
 });
 

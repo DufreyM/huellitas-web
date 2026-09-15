@@ -1,8 +1,8 @@
 const eventRegistrationRepository = require("../repositories/eventRegistration.repository");
 const ApiError = require("../utils/ApiError");
 
-async function listRegistrations() {
-    return await eventRegistrationRepository.getAllRegistrations();
+async function listRegistrations({ skip, limit } = {}) {
+    return await eventRegistrationRepository.getAllRegistrations({ skip, limit });
 }
 
 async function createRegistration(data) {

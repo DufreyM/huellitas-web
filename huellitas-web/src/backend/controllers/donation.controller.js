@@ -1,12 +1,14 @@
 const donationService = require("../services/donation.service");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
+const { parsePagination, buildPaginatedResult } = require("../utils/pagination");
 
 const getAllDonations = asyncHandler(async (req, res) => {
-    const donations = await donationService.getAllDonations();
+    const { page, limit, skip } = parsePagination(req.query);
+    const { items, total } = await donationService.getAllDonations({ skip, limit });
 
     return res.status(200).json(
-        new ApiResponse(200, "Donaciones obtenidas correctamente", donations)
+        new ApiResponse(200, "Donaciones obtenidas correctamente", buildPaginatedResult(items, total, page, limit))
     );
 });
 

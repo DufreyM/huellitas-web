@@ -1,22 +1,31 @@
 const prisma = require("../config/prisma");
 
-async function getAllPets({ availableOnly = false } = {}) {
-    return prisma.pet.findMany({
-        where: {
-            isActive: true,
-            ...(availableOnly && {
-                status: {
-                    notIn: ["Adoptada", "En_tratamiento"]
-                }
-            })
-        },
-        include: {
-            images: true
-        },
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
+async function getAllPets({ availableOnly = false, skip, limit } = {}) {
+    const where = {
+        isActive: true,
+        ...(availableOnly && {
+            status: {
+                notIn: ["Adoptada", "En_tratamiento"]
+            }
+        })
+    };
+
+    const [items, total] = await Promise.all([
+        prisma.pet.findMany({
+            where,
+            include: {
+                images: true
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip,
+            take: limit
+        }),
+        prisma.pet.count({ where })
+    ]);
+
+    return { items, total };
 }
 
 async function getPetById(id) {

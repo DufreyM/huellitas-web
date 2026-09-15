@@ -1,8 +1,8 @@
 const eventRepository = require("../repositories/event.repository");
 const ApiError = require("../utils/ApiError");
 
-async function getAllEvents() {
-    return await eventRepository.getAllEvents();
+async function getAllEvents({ skip, limit } = {}) {
+    return await eventRepository.getAllEvents({ skip, limit });
 }
 
 async function getEventById(id) {

@@ -24,12 +24,19 @@ async function findByResetTokenHash(tokenHash) {
     });
 }
 
-async function findAll() {
-    return prisma.user.findMany({
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
+async function findAll({ skip, limit } = {}) {
+    const [items, total] = await Promise.all([
+        prisma.user.findMany({
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip,
+            take: limit
+        }),
+        prisma.user.count()
+    ]);
+
+    return { items, total };
 }
 
 async function create(data) {

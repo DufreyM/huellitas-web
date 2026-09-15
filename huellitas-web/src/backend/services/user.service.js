@@ -9,10 +9,10 @@ function sanitizeUser(user) {
     return safeUser;
 }
 
-async function listUsers() {
-    const users = await userRepository.findAll();
+async function listUsers({ skip, limit } = {}) {
+    const { items, total } = await userRepository.findAll({ skip, limit });
 
-    return users.map(sanitizeUser);
+    return { items: items.map(sanitizeUser), total };
 }
 
 async function createUser({ name, email, phone, password, role }) {

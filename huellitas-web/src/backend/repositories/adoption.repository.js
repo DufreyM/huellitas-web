@@ -28,16 +28,23 @@ async function createAdoptionRequest(data) {
     });
 }
 
-async function getAllAdoptionRequests() {
-    return prisma.adoptionRequest.findMany({
-        include: {
-            adopter: true,
-            pet: true
-        },
-        orderBy: {
-            submittedAt: "desc"
-        }
-    });
+async function getAllAdoptionRequests({ skip, limit } = {}) {
+    const [items, total] = await Promise.all([
+        prisma.adoptionRequest.findMany({
+            include: {
+                adopter: true,
+                pet: true
+            },
+            orderBy: {
+                submittedAt: "desc"
+            },
+            skip,
+            take: limit
+        }),
+        prisma.adoptionRequest.count()
+    ]);
+
+    return { items, total };
 }
 
 async function findById(id) {

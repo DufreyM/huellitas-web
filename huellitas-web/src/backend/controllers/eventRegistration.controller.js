@@ -1,12 +1,14 @@
 const eventRegistrationService = require("../services/eventRegistration.service");
 const ApiResponse = require("../utils/ApiResponse");
 const asyncHandler = require("../utils/asyncHandler");
+const { parsePagination, buildPaginatedResult } = require("../utils/pagination");
 
 const getAllRegistrations = asyncHandler(async (req, res) => {
-    const registrations = await eventRegistrationService.listRegistrations();
+    const { page, limit, skip } = parsePagination(req.query);
+    const { items, total } = await eventRegistrationService.listRegistrations({ skip, limit });
 
     return res.status(200).json(
-        new ApiResponse(200, "Inscripciones obtenidas correctamente", registrations)
+        new ApiResponse(200, "Inscripciones obtenidas correctamente", buildPaginatedResult(items, total, page, limit))
     );
 });
 
