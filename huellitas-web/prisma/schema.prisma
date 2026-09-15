@@ -309,3 +309,12 @@ model Contact {
 
   @@map("contacts")
 }
+
+model SiteSetting {
+  id              Int      @id @default(1)
+  instagramHandle String   @default("@huellitasdelacalleong") @map("instagram_handle")
+  contactEmail    String   @default("contacto@huellitas.org") @map("contact_email")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
