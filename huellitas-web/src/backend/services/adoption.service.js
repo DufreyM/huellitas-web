@@ -57,7 +57,7 @@ async function listAdoptionRequests({ skip, limit } = {}) {
     return await adoptionRepository.getAllAdoptionRequests({ skip, limit });
 }
 
-async function updateAdoptionRequestStatus(id, status) {
+async function updateAdoptionRequestStatus(id, status, changedByUserId) {
     const existing = await adoptionRepository.findById(id);
 
     if (!existing) {
@@ -79,7 +79,8 @@ async function updateAdoptionRequestStatus(id, status) {
         await petService.forceStatus(
             existing.petId,
             "Adoptada",
-            `Adopción aprobada (solicitud #${existing.id})`
+            `Adopción aprobada (solicitud #${existing.id})`,
+            changedByUserId
         );
     }
 

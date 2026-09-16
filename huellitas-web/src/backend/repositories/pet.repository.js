@@ -103,15 +103,20 @@ async function deletePet(id) {
     });
 }
 
-async function createStatusHistory({ petId, previousStatus, newStatus, note }) {
+async function createStatusHistory({ petId, previousStatus, newStatus, note, changedByUserId }) {
     return prisma.petStatusHistory.create({
-        data: { petId, previousStatus, newStatus, note }
+        data: { petId, previousStatus, newStatus, note, changedByUserId }
     });
 }
 
 async function getStatusHistory(petId) {
     return prisma.petStatusHistory.findMany({
         where: { petId },
+        include: {
+            changedBy: {
+                select: { id: true, name: true }
+            }
+        },
         orderBy: { changedAt: "desc" }
     });
 }

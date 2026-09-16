@@ -31,7 +31,8 @@ const getAllAdoptionRequests = asyncHandler(async (req, res) => {
 const updateAdoptionRequestStatus = asyncHandler(async (req, res) => {
     const adoptionRequest = await adoptionService.updateAdoptionRequestStatus(
         Number(req.params.id),
-        req.body.status
+        req.body.status,
+        req.user.id
     );
 
     return res.status(200).json(

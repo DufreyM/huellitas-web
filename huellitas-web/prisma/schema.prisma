@@ -103,7 +103,8 @@ model User {
   passwordResetExpires   DateTime? @map("password_reset_expires")
   lastLoginAt            DateTime? @map("last_login_at")
 
-  events Event[]
+  events            Event[]
+  petStatusChanges  PetStatusHistory[]
 
   @@map("users")
 }
@@ -326,9 +327,11 @@ model PetStatusHistory {
   previousStatus PetStatus? @map("previous_status")
   newStatus      PetStatus  @map("new_status")
   note           String?
+  changedByUserId Int       @map("changed_by_user_id")
   changedAt      DateTime   @default(now()) @map("changed_at")
 
-  pet Pet @relation(fields: [petId], references: [id])
+  pet       Pet  @relation(fields: [petId], references: [id])
+  changedBy User @relation(fields: [changedByUserId], references: [id])
 
   @@map("pet_status_history")
 }

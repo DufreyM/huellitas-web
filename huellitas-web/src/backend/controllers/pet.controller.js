@@ -45,7 +45,8 @@ const createPet = asyncHandler(async (req, res) => {
 const updatePet = asyncHandler(async (req, res) => {
     const pet = await petService.updatePet(
         Number(req.params.id),
-        req.body
+        req.body,
+        req.user.id
     );
 
     return res.status(200).json(

@@ -84,16 +84,18 @@ describe("pet.service — transiciones de estado", () => {
         expect(petRepository.updatePet).toHaveBeenCalled();
     });
 
-    it("registra el cambio en el historial cuando el status sí cambia", async () => {
+    it("registra el cambio en el historial (con autor) cuando el status sí cambia", async () => {
         petRepository.getPetById.mockResolvedValue(basePet);
         petRepository.updatePet.mockResolvedValue({ ...basePet, status: "Reservada" });
 
-        await petService.updatePet(1, { status: "Reservada" });
+        await petService.updatePet(1, { status: "Reservada" }, 9);
 
         expect(petRepository.createStatusHistory).toHaveBeenCalledWith({
             petId: 1,
             previousStatus: "Disponible",
-            newStatus: "Reservada"
+            newStatus: "Reservada",
+            note: expect.any(String),
+            changedByUserId: 9
         });
     });
 
@@ -112,18 +114,19 @@ describe("pet.service — forceStatus", () => {
         jest.clearAllMocks();
     });
 
-    it("cambia el estado sin validar VALID_STATUS_TRANSITIONS", async () => {
+    it("cambia el estado sin validar VALID_STATUS_TRANSITIONS y registra al autor", async () => {
         petRepository.getPetById.mockResolvedValue({ ...basePet, status: "Disponible" });
         petRepository.updatePet.mockResolvedValue({ ...basePet, status: "Adoptada" });
 
-        const result = await petService.forceStatus(1, "Adoptada", "Adopción aprobada");
+        const result = await petService.forceStatus(1, "Adoptada", "Adopción aprobada", 3);
 
         expect(petRepository.updatePet).toHaveBeenCalledWith(1, { status: "Adoptada" });
         expect(petRepository.createStatusHistory).toHaveBeenCalledWith({
             petId: 1,
             previousStatus: "Disponible",
             newStatus: "Adoptada",
-            note: "Adopción aprobada"
+            note: "Adopción aprobada",
+            changedByUserId: 3
         });
         expect(result.status).toBe("Adoptada");
     });
@@ -131,7 +134,7 @@ describe("pet.service — forceStatus", () => {
     it("no hace nada si ya tiene ese estado", async () => {
         petRepository.getPetById.mockResolvedValue({ ...basePet, status: "Adoptada" });
 
-        await petService.forceStatus(1, "Adoptada", "nota");
+        await petService.forceStatus(1, "Adoptada", "nota", 3);
 
         expect(petRepository.updatePet).not.toHaveBeenCalled();
         expect(petRepository.createStatusHistory).not.toHaveBeenCalled();

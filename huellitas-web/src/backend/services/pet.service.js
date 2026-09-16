@@ -27,7 +27,7 @@ async function createPet(data) {
     return await petRepository.createPet(data);
 }
 
-async function updatePet(id, data) {
+async function updatePet(id, data, changedByUserId) {
     const currentPet = await getPetById(id);
     const statusChanged = data.status && data.status !== currentPet.status;
 
@@ -48,7 +48,9 @@ async function updatePet(id, data) {
         await petRepository.createStatusHistory({
             petId: id,
             previousStatus: currentPet.status,
-            newStatus: data.status
+            newStatus: data.status,
+            note: "Actualizado manualmente desde el panel de Adopciones",
+            changedByUserId
         });
     }
 
@@ -57,7 +59,7 @@ async function updatePet(id, data) {
 
 // Cambia el estado sin validar VALID_STATUS_TRANSITIONS: uso exclusivo de flujos internos
 // ya autorizados (p. ej. al aprobar una solicitud de adopción), no de ediciones directas.
-async function forceStatus(id, newStatus, note) {
+async function forceStatus(id, newStatus, note, changedByUserId) {
     const currentPet = await getPetById(id);
 
     if (currentPet.status === newStatus) {
@@ -70,7 +72,8 @@ async function forceStatus(id, newStatus, note) {
         petId: id,
         previousStatus: currentPet.status,
         newStatus,
-        note
+        note,
+        changedByUserId
     });
 
     return updatedPet;

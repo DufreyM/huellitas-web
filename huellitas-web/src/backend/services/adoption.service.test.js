@@ -28,18 +28,18 @@ describe("adoption.service — updateAdoptionRequestStatus", () => {
         expect(result.status).toBe("Aprobada");
     });
 
-    it("al aprobar, crea el registro de adopción y fuerza el estado de la mascota", async () => {
+    it("al aprobar, crea el registro de adopción y fuerza el estado de la mascota con el autor", async () => {
         adoptionRepository.findById.mockResolvedValue({
             id: 5, status: "Pendiente", adopterId: 2, petId: 7, adoption: null
         });
         adoptionRepository.updateStatus.mockResolvedValue({ id: 5, status: "Aprobada" });
 
-        await adoptionService.updateAdoptionRequestStatus(5, "Aprobada");
+        await adoptionService.updateAdoptionRequestStatus(5, "Aprobada", 4);
 
         expect(adoptionRepository.createAdoption).toHaveBeenCalledWith(
             expect.objectContaining({ adopterId: 2, petId: 7, requestId: 5 })
         );
-        expect(petService.forceStatus).toHaveBeenCalledWith(7, "Adoptada", expect.any(String));
+        expect(petService.forceStatus).toHaveBeenCalledWith(7, "Adoptada", expect.any(String), 4);
     });
 
     it("no duplica la adopción si la solicitud ya estaba aprobada", async () => {
