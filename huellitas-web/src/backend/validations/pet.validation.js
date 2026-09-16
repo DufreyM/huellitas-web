@@ -39,6 +39,8 @@ const createPetSchema = z.object({
         "No_disponible"
     ]),
 
+    intakeDate: z.coerce.date().optional(),
+
     featured: z.boolean().optional(),
 
     images: z.array(

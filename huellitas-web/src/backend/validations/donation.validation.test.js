@@ -32,4 +32,15 @@ describe("donation.validation — datos incompletos", () => {
     it("rechaza un método de pago que no existe en el enum", () => {
         expect(createDonationSchema.safeParse({ ...validDonation, paymentMethod: "Cripto" }).success).toBe(false);
     });
+
+    it("acepta una fecha de donación distinta a hoy", () => {
+        const result = createDonationSchema.safeParse({ ...validDonation, donationDate: "2026-01-15" });
+
+        expect(result.success).toBe(true);
+        expect(result.data.donationDate).toBeInstanceOf(Date);
+    });
+
+    it("rechaza una fecha de donación con formato inválido", () => {
+        expect(createDonationSchema.safeParse({ ...validDonation, donationDate: "no-es-fecha" }).success).toBe(false);
+    });
 });

@@ -15,6 +15,8 @@ const createDonationSchema = z.object({
         "Otro"
     ]),
 
+    donationDate: z.coerce.date().optional(),
+
     notes: z.string().optional()
 });
 

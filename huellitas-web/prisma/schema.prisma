@@ -124,6 +124,7 @@ model Pet {
   status       PetStatus
   featured     Boolean    @default(false)
   isActive     Boolean    @default(true) @map("is_active")
+  intakeDate   DateTime   @default(now()) @map("intake_date") @db.Date
   createdAt    DateTime   @default(now()) @map("created_at")
 
   images           PetImage[]
