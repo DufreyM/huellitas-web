@@ -130,6 +130,7 @@ model Pet {
   adoptionRequests AdoptionRequest[]
   adoptions        Adoption[]
   successStories   SuccessStory[]
+  statusHistory    PetStatusHistory[]
 
   @@map("pets")
 }
@@ -317,4 +318,17 @@ model SiteSetting {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")
+}
+
+model PetStatusHistory {
+  id             Int        @id @default(autoincrement())
+  petId          Int        @map("pet_id")
+  previousStatus PetStatus? @map("previous_status")
+  newStatus      PetStatus  @map("new_status")
+  note           String?
+  changedAt      DateTime   @default(now()) @map("changed_at")
+
+  pet Pet @relation(fields: [petId], references: [id])
+
+  @@map("pet_status_history")
 }

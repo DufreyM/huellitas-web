@@ -83,4 +83,57 @@ describe("pet.service — transiciones de estado", () => {
 
         expect(petRepository.updatePet).toHaveBeenCalled();
     });
+
+    it("registra el cambio en el historial cuando el status sí cambia", async () => {
+        petRepository.getPetById.mockResolvedValue(basePet);
+        petRepository.updatePet.mockResolvedValue({ ...basePet, status: "Reservada" });
+
+        await petService.updatePet(1, { status: "Reservada" });
+
+        expect(petRepository.createStatusHistory).toHaveBeenCalledWith({
+            petId: 1,
+            previousStatus: "Disponible",
+            newStatus: "Reservada"
+        });
+    });
+
+    it("no registra historial si el status no cambia", async () => {
+        petRepository.getPetById.mockResolvedValue(basePet);
+        petRepository.updatePet.mockResolvedValue(basePet);
+
+        await petService.updatePet(1, { name: "Firulais editado", status: "Disponible" });
+
+        expect(petRepository.createStatusHistory).not.toHaveBeenCalled();
+    });
+});
+
+describe("pet.service — forceStatus", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it("cambia el estado sin validar VALID_STATUS_TRANSITIONS", async () => {
+        petRepository.getPetById.mockResolvedValue({ ...basePet, status: "Disponible" });
+        petRepository.updatePet.mockResolvedValue({ ...basePet, status: "Adoptada" });
+
+        const result = await petService.forceStatus(1, "Adoptada", "Adopción aprobada");
+
+        expect(petRepository.updatePet).toHaveBeenCalledWith(1, { status: "Adoptada" });
+        expect(petRepository.createStatusHistory).toHaveBeenCalledWith({
+            petId: 1,
+            previousStatus: "Disponible",
+            newStatus: "Adoptada",
+            note: "Adopción aprobada"
+        });
+        expect(result.status).toBe("Adoptada");
+    });
+
+    it("no hace nada si ya tiene ese estado", async () => {
+        petRepository.getPetById.mockResolvedValue({ ...basePet, status: "Adoptada" });
+
+        await petService.forceStatus(1, "Adoptada", "nota");
+
+        expect(petRepository.updatePet).not.toHaveBeenCalled();
+        expect(petRepository.createStatusHistory).not.toHaveBeenCalled();
+    });
 });

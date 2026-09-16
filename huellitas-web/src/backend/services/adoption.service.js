@@ -1,4 +1,5 @@
 const adoptionRepository = require("../repositories/adoption.repository");
+const petService = require("./pet.service");
 const ApiError = require("../utils/ApiError");
 
 async function createAdoptionRequest(data) {
@@ -63,7 +64,26 @@ async function updateAdoptionRequestStatus(id, status) {
         throw new ApiError(404, "Solicitud de adopción no encontrada");
     }
 
-    return await adoptionRepository.updateStatus(id, status);
+    const updated = await adoptionRepository.updateStatus(id, status);
+
+    // Al aprobar, se completa la adopción: se registra en `adoptions` y la mascota
+    // pasa a "Adoptada", quedando visible en la línea de tiempo de Seguimiento.
+    if (status === "Aprobada" && existing.status !== "Aprobada" && !existing.adoption) {
+        await adoptionRepository.createAdoption({
+            adopterId: existing.adopterId,
+            petId: existing.petId,
+            requestId: existing.id,
+            adoptionDate: new Date()
+        });
+
+        await petService.forceStatus(
+            existing.petId,
+            "Adoptada",
+            `Adopción aprobada (solicitud #${existing.id})`
+        );
+    }
+
+    return updated;
 }
 
 module.exports = {

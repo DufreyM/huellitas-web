@@ -29,8 +29,9 @@ async function createPet(data) {
 
 async function updatePet(id, data) {
     const currentPet = await getPetById(id);
+    const statusChanged = data.status && data.status !== currentPet.status;
 
-    if (data.status && data.status !== currentPet.status) {
+    if (statusChanged) {
         const allowedNextStatuses = VALID_STATUS_TRANSITIONS[currentPet.status] || [];
 
         if (!allowedNextStatuses.includes(data.status)) {
@@ -41,7 +42,44 @@ async function updatePet(id, data) {
         }
     }
 
-    return await petRepository.updatePet(id, data);
+    const updatedPet = await petRepository.updatePet(id, data);
+
+    if (statusChanged) {
+        await petRepository.createStatusHistory({
+            petId: id,
+            previousStatus: currentPet.status,
+            newStatus: data.status
+        });
+    }
+
+    return updatedPet;
+}
+
+// Cambia el estado sin validar VALID_STATUS_TRANSITIONS: uso exclusivo de flujos internos
+// ya autorizados (p. ej. al aprobar una solicitud de adopción), no de ediciones directas.
+async function forceStatus(id, newStatus, note) {
+    const currentPet = await getPetById(id);
+
+    if (currentPet.status === newStatus) {
+        return currentPet;
+    }
+
+    const updatedPet = await petRepository.updatePet(id, { status: newStatus });
+
+    await petRepository.createStatusHistory({
+        petId: id,
+        previousStatus: currentPet.status,
+        newStatus,
+        note
+    });
+
+    return updatedPet;
+}
+
+async function getStatusHistory(id) {
+    await getPetById(id);
+
+    return await petRepository.getStatusHistory(id);
 }
 
 async function deletePet(id) {
@@ -55,5 +93,7 @@ module.exports = {
     getPetById,
     createPet,
     updatePet,
+    forceStatus,
+    getStatusHistory,
     deletePet
 };

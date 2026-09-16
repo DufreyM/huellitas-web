@@ -52,7 +52,8 @@ async function findById(id) {
         where: { id },
         include: {
             adopter: true,
-            pet: true
+            pet: true,
+            adoption: true
         }
     });
 }
@@ -68,6 +69,12 @@ async function updateStatus(id, status) {
     });
 }
 
+async function createAdoption({ adopterId, petId, requestId, adoptionDate }) {
+    return prisma.adoption.create({
+        data: { adopterId, petId, requestId, adoptionDate }
+    });
+}
+
 module.exports = {
     findAdopterByDpi,
     createAdopter,
@@ -75,5 +82,6 @@ module.exports = {
     createAdoptionRequest,
     getAllAdoptionRequests,
     findById,
-    updateStatus
+    updateStatus,
+    createAdoption
 };

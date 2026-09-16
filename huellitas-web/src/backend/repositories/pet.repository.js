@@ -103,10 +103,25 @@ async function deletePet(id) {
     });
 }
 
+async function createStatusHistory({ petId, previousStatus, newStatus, note }) {
+    return prisma.petStatusHistory.create({
+        data: { petId, previousStatus, newStatus, note }
+    });
+}
+
+async function getStatusHistory(petId) {
+    return prisma.petStatusHistory.findMany({
+        where: { petId },
+        orderBy: { changedAt: "desc" }
+    });
+}
+
 module.exports = {
     getAllPets,
     getPetById,
     createPet,
     updatePet,
-    deletePet
+    deletePet,
+    createStatusHistory,
+    getStatusHistory
 };

@@ -11,6 +11,13 @@ router.get("/", petController.getAllPets);
 
 router.get("/:id", petController.getPetById);
 
+router.get(
+    "/:id/status-history",
+    protect,
+    authorize("Superadministrador", "Operador"),
+    petController.getStatusHistory
+);
+
 router.post(
     "/",
     protect,

@@ -68,10 +68,23 @@ const deletePet = asyncHandler(async (req, res) => {
     );
 });
 
+const getStatusHistory = asyncHandler(async (req, res) => {
+    const history = await petService.getStatusHistory(Number(req.params.id));
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            "Historial de estado obtenido correctamente",
+            history
+        )
+    );
+});
+
 module.exports = {
     getAllPets,
     getPetById,
     createPet,
     updatePet,
-    deletePet
+    deletePet,
+    getStatusHistory
 };
