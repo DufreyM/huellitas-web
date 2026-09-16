@@ -25,7 +25,15 @@ const createEventSchema = z.object({
         "En_curso",
         "Finalizado",
         "Cancelado"
-    ])
+    ]),
+
+    timeSlots: z.array(
+        z.object({
+            id: z.number().int().positive().optional(),
+            startTime: z.string().min(1),
+            capacity: z.number().int().positive()
+        })
+    ).optional()
 });
 
 const updateEventSchema = createEventSchema.partial();

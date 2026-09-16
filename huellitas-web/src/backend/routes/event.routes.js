@@ -11,6 +11,13 @@ router.get("/", eventController.getAllEvents);
 
 router.get("/:id", eventController.getEventById);
 
+router.get(
+    "/:id/dashboard",
+    protect,
+    authorize("Superadministrador", "Operador"),
+    eventController.getJornadaDashboard
+);
+
 router.post(
     "/",
     protect,

@@ -1,4 +1,5 @@
 const eventRepository = require("../repositories/event.repository");
+const eventRegistrationRepository = require("../repositories/eventRegistration.repository");
 const ApiError = require("../utils/ApiError");
 
 async function getAllEvents({ skip, limit } = {}) {
@@ -42,10 +43,37 @@ async function deleteEvent(id) {
     return await eventRepository.deleteEvent(id);
 }
 
+// Vista consolidada de una jornada: horarios con cupo usado/disponible y
+// cuántos pacientes hay en cada estado (inscrito, evaluado, castrado, etc.).
+async function getJornadaDashboard(id) {
+    const event = await getEventById(id);
+    const statusSummary = await eventRegistrationRepository.getStatusSummary(id);
+
+    const timeSlots = event.timeSlots.map(slot => ({
+        id: slot.id,
+        startTime: slot.startTime,
+        capacity: slot.capacity,
+        registered: slot._count.registrations,
+        available: Math.max(0, slot.capacity - slot._count.registrations)
+    }));
+
+    const totalCapacity = timeSlots.reduce((sum, slot) => sum + slot.capacity, 0);
+    const totalRegistered = timeSlots.reduce((sum, slot) => sum + slot.registered, 0);
+
+    return {
+        event,
+        timeSlots,
+        totalCapacity,
+        totalRegistered,
+        statusSummary
+    };
+}
+
 module.exports = {
     getAllEvents,
     getEventById,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getJornadaDashboard
 };

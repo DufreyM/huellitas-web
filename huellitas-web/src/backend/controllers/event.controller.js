@@ -44,10 +44,19 @@ const deleteEvent = asyncHandler(async (req, res) => {
     );
 });
 
+const getJornadaDashboard = asyncHandler(async (req, res) => {
+    const dashboard = await eventService.getJornadaDashboard(Number(req.params.id));
+
+    return res.status(200).json(
+        new ApiResponse(200, "Resumen de la jornada obtenido correctamente", dashboard)
+    );
+});
+
 module.exports = {
     getAllEvents,
     getEventById,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    getJornadaDashboard
 };

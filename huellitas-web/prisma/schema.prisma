@@ -85,6 +85,22 @@ enum UserRole {
   Operador
 }
 
+enum CastrationPatientStatus {
+  Inscrito
+  Evaluado
+  Aprobado
+  Rechazado
+  Pagado
+  Castrado
+  En_seguimiento
+  Seguimiento_finalizado
+}
+
+enum FollowUpStatus {
+  Pendiente
+  Finalizado
+}
+
 // =======================
 // MODELS
 // =======================
@@ -231,23 +247,52 @@ model Event {
 
   creator       User                @relation(fields: [createdBy], references: [id])
   registrations EventRegistration[]
+  timeSlots     EventTimeSlot[]
 
   @@map("events")
 }
 
-model EventRegistration {
-  id            Int           @id @default(autoincrement())
-  eventId       Int           @map("event_id")
-  petName       String        @map("pet_name")
-  species       PetSpecies
-  breed         String
-  ownerName     String        @map("owner_name")
-  ownerPhone    String        @map("owner_phone")
-  procedureType ProcedureType @map("procedure_type")
-  notes         String?
-  createdAt     DateTime      @default(now()) @map("created_at")
+// Tandas/horarios de una jornada (p. ej. 25 pacientes a las 9:00, 25 a las 11:00).
+// El cupo total de la jornada se calcula sumando estos cupos, no se guarda aparte,
+// para que nunca queden desincronizados.
+model EventTimeSlot {
+  id        Int    @id @default(autoincrement())
+  eventId   Int    @map("event_id")
+  startTime String @map("start_time")
+  capacity  Int
 
-  event Event @relation(fields: [eventId], references: [id])
+  event         Event                @relation(fields: [eventId], references: [id])
+  registrations EventRegistration[]
+
+  @@map("event_time_slots")
+}
+
+model EventRegistration {
+  id                  Int                     @id @default(autoincrement())
+  eventId             Int                     @map("event_id")
+  timeSlotId          Int                     @map("time_slot_id")
+  petName             String                  @map("pet_name")
+  species             PetSpecies
+  gender              PetGender
+  breed               String
+  birthDate           DateTime                @map("birth_date") @db.Date
+  lastDewormingDate    DateTime                @map("last_deworming_date") @db.Date
+  lastVaccinationDate DateTime                @map("last_vaccination_date") @db.Date
+  ownerName           String                  @map("owner_name")
+  ownerPhone          String                  @map("owner_phone")
+  ownerEmail          String                  @map("owner_email")
+  procedureType       ProcedureType           @map("procedure_type")
+  status              CastrationPatientStatus @default(Inscrito)
+  surgeryDate         DateTime?               @map("surgery_date") @db.Date
+  antibioticStatus    FollowUpStatus?         @map("antibiotic_status")
+  stitchRemovalStatus FollowUpStatus?         @map("stitch_removal_status")
+  followUpCompleted   Boolean                 @default(false) @map("follow_up_completed")
+  observations        String?
+  notes               String?
+  createdAt           DateTime                @default(now()) @map("created_at")
+
+  event    Event         @relation(fields: [eventId], references: [id])
+  timeSlot EventTimeSlot @relation(fields: [timeSlotId], references: [id])
 
   @@map("event_registrations")
 }
