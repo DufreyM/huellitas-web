@@ -9,7 +9,8 @@ const heroSlideSchema = z.object({
     imageUrl: z.string().min(1),
     theme: z.string().min(1),
     headline: z.string().min(1),
-    headlineLine2: z.string().min(1)
+    headlineLine2: z.string().min(1),
+    focusPosition: z.enum(["center top", "center center", "center bottom"]).optional()
 });
 
 const updateSiteSettingsSchema = z.object({
