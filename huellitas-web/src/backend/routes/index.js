@@ -10,6 +10,7 @@ const medicalRecordRoutes = require("./medicalRecord.routes");
 const eventRegistrationRoutes = require("./eventRegistration.routes");
 const uploadRoutes = require("./upload.routes");
 const siteSettingRoutes = require("./siteSetting.routes");
+const statsRoutes = require("./stats.routes");
 
 const router = express.Router();
 
@@ -37,5 +38,6 @@ router.use("/medical-records", medicalRecordRoutes);
 router.use("/event-registrations", eventRegistrationRoutes);
 router.use("/uploads", uploadRoutes);
 router.use("/site-settings", siteSettingRoutes);
+router.use("/stats", statsRoutes);
 
 module.exports = router;
