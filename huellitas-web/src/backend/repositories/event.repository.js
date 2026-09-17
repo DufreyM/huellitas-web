@@ -21,7 +21,8 @@ async function getAllEvents({ skip, limit } = {}) {
                 startDate: "asc"
             },
             skip,
-            take: limit
+            take: limit,
+            include: withTimeSlots
         }),
         prisma.event.count({ where: { isActive: true } })
     ]);
