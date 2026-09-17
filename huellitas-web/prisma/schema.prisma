@@ -359,10 +359,18 @@ model Contact {
 }
 
 model SiteSetting {
-  id              Int      @id @default(1)
-  instagramHandle String   @default("@huellitasdelacalleong") @map("instagram_handle")
-  contactEmail    String   @default("contacto@huellitas.org") @map("contact_email")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                     Int      @id @default(1)
+  instagramHandle        String   @default("@huellitasdelacalleong") @map("instagram_handle")
+  contactEmail           String   @default("contacto@huellitas.org") @map("contact_email")
+  whatsappNumber         String   @default("50212345678") @map("whatsapp_number")
+  bankName               String   @default("Banco Industrial") @map("bank_name")
+  bankAccountType        String   @default("Cuenta Monetaria") @map("bank_account_type")
+  bankAccountNumber      String   @default("123-456789-0") @map("bank_account_number")
+  bankAccountHolder      String   @default("Asociación Huellitas de la Calle") @map("bank_account_holder")
+  donationDropoffAddress String   @default("Zona 10, Ciudad de Guatemala") @map("donation_dropoff_address")
+  donationDropoffHours   String   @default("Lunes a sábado de 9:00 AM a 4:00 PM") @map("donation_dropoff_hours")
+  neededSupplies         String[] @default(["Concentrado para perros", "Concentrado para gatos", "Medicamentos", "Camas y Cobijas", "Correas", "Transportadoras", "Arena para gatos", "Productos de limpieza"]) @map("needed_supplies")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
   @@map("site_settings")
 }
