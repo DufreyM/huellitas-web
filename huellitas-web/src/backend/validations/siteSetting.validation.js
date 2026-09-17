@@ -1,5 +1,17 @@
 const { z } = require("zod");
 
+const timelineEntrySchema = z.object({
+    year: z.string().min(1),
+    text: z.string().min(1)
+});
+
+const heroSlideSchema = z.object({
+    imageUrl: z.string().min(1),
+    theme: z.string().min(1),
+    headline: z.string().min(1),
+    headlineLine2: z.string().min(1)
+});
+
 const updateSiteSettingsSchema = z.object({
     instagramHandle: z.string().min(1),
     contactEmail: z.string().email(),
@@ -10,7 +22,11 @@ const updateSiteSettingsSchema = z.object({
     bankAccountHolder: z.string().min(1),
     donationDropoffAddress: z.string().min(1),
     donationDropoffHours: z.string().min(1),
-    neededSupplies: z.array(z.string().min(1)).min(1)
+    neededSupplies: z.array(z.string().min(1)).min(1),
+    mission: z.string().min(1),
+    vision: z.string().min(1),
+    timeline: z.array(timelineEntrySchema).min(1),
+    heroSlides: z.array(heroSlideSchema)
 });
 
 module.exports = { updateSiteSettingsSchema };

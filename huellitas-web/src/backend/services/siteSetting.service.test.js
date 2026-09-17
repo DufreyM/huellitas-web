@@ -32,7 +32,11 @@ describe("siteSetting.service", () => {
                 "Transportadoras",
                 "Arena para gatos",
                 "Productos de limpieza"
-            ]
+            ],
+            mission: expect.any(String),
+            vision: expect.any(String),
+            timeline: expect.any(Array),
+            heroSlides: []
         });
     });
 
