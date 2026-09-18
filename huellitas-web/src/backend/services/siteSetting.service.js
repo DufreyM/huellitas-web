@@ -28,7 +28,12 @@ const DEFAULTS = {
         { year: "2022", text: "Lanzamos nuestro primer programa de jornadas de castración, esterilizando más de 200 mascotas en comunidades de bajos recursos." },
         { year: "2024", text: "Hemos facilitado más de 500 adopciones exitosas y realizamos jornadas mensuales de castración en todo Guatemala." }
     ],
-    heroSlides: []
+    heroSlides: [],
+    faqs: [
+        { question: "¿Cómo puedo realizar una donación?", answer: "Puedes realizar transferencias directas a nuestra cuenta bancaria en Banco Industrial. Para donaciones desde el extranjero o uso de tarjeta, contáctanos a nuestro WhatsApp para enviarte un enlace de pago seguro." },
+        { question: "¿Dónde puedo entregar mis donaciones en especie?", answer: "Recibimos donaciones físicas en nuestro centro de acopio principal ubicado en Zona 10, Ciudad de Guatemala, Lunes a sábado de 9:00 AM a 4:00 PM. Por favor, comunícate con nosotros para coordinar tu visita." },
+        { question: "¿Cómo se utilizan las donaciones?", answer: "El 100% de las donaciones se destina directamente al bienestar animal. Los fondos cubren facturas veterinarias, cirugías de emergencia, medicamentos, alimentos, y gastos de refugios temporales. Publicamos reportes de transparencia trimestrales en nuestra plataforma." }
+    ]
 };
 
 async function getSiteSettings() {

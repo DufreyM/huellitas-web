@@ -13,6 +13,11 @@ const heroSlideSchema = z.object({
     focusPosition: z.enum(["center top", "center center", "center bottom"]).optional()
 });
 
+const faqEntrySchema = z.object({
+    question: z.string().min(1),
+    answer: z.string().min(1)
+});
+
 const updateSiteSettingsSchema = z.object({
     instagramHandle: z.string().min(1),
     contactEmail: z.string().email(),
@@ -27,7 +32,8 @@ const updateSiteSettingsSchema = z.object({
     mission: z.string().min(1),
     vision: z.string().min(1),
     timeline: z.array(timelineEntrySchema).min(1),
-    heroSlides: z.array(heroSlideSchema)
+    heroSlides: z.array(heroSlideSchema),
+    faqs: z.array(faqEntrySchema).min(1)
 });
 
 module.exports = { updateSiteSettingsSchema };

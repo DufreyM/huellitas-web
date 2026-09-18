@@ -36,7 +36,8 @@ describe("siteSetting.service", () => {
             mission: expect.any(String),
             vision: expect.any(String),
             timeline: expect.any(Array),
-            heroSlides: []
+            heroSlides: [],
+            faqs: expect.any(Array)
         });
     });
 
